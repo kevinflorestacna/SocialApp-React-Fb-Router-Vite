@@ -1,39 +1,76 @@
-import { useContext } from "react"
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { UserContext } from "../Context/UserProvider"
+import { useContext } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../Context/UserProvider";
+import { errorsFirebase } from "../utils/errorsFirebase";
+import { formValidate } from "../utils/formValidate";
+
+import FormAlert from "../components/FormAlert";
+import FormInput from "../components/FormInput";
 
 const Register = () => {
+    const navegate = useNavigate();
+    const { registerUser } = useContext(UserContext);
+    const { required, patternEmail, minLength, validateTrim, validateEquals } =
+        formValidate();
 
-  const [email,setEmail] =useState('')
-  const [password,setPassword] =useState('')
-  
-  const navegate=useNavigate()
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        getValues,
+        setError,
+    } = useForm();
 
-  const {registerUser} = useContext(UserContext)
-  
-  const handleSubmit =async(e) =>{
-    e.preventDefault();
-    console.log('procesando form : ',email,password)
-    try{
-        await registerUser(email,password)
-        console.log("Usuario Creado")
-        navegate("/")
-    } catch(error){
-        console.log(error)
-    }
-  }  
-  
-  return (
-    <>
-        <h1>Register</h1>
-        <form onSubmit={handleSubmit}> 
-            <input type="email" placeholder ="Ingrese Email" onChange={e=>setEmail(e.target.value)} />
-            <input type="password" placeholder ="Ingrese Contraseña" onChange={e=>setPassword(e.target.value)} />
-            <button type="submit">Registrar</button>
-        </form>
-    </>
-  )
-}
+    const onSubmit = async ({ email, password }) => {
+        try {
+            await registerUser(email, password);
+            navegate("/");
+        } catch (error) {
+            const { code, message } = errorsFirebase(error);
+            setError(code, { message });
+        }
+    };
 
-export default Register
+    return (
+        <>
+            <h1>Register</h1>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <FormInput
+                    type="email"
+                    placeholder="Ingresa un email"
+                    {...register("email", {
+                        required,
+                        pattern: patternEmail,
+                    })}
+                >
+                    <FormAlert error={errors.email} />
+                </FormInput>
+
+                <FormInput
+                    type="password"
+                    placeholder="Ingresa un password"
+                    {...register("password", {
+                        minLength,
+                        validate: validateTrim,
+                    })}
+                >
+                    <FormAlert error={errors.password} />
+                </FormInput>
+
+                <FormInput
+                    type="password"
+                    placeholder="Repita password"
+                    {...register("repassword", {
+                        validate: validateEquals(getValues("password")),
+                    })}
+                >
+                    <FormAlert error={errors.repassword} />
+                </FormInput>
+                <button type="submit">Register</button>
+            </form>
+        </>
+    );
+};
+
+export default Register;

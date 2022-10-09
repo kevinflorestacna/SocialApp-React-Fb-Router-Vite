@@ -9,7 +9,6 @@ import Register from './routes/Register';
 const App=()=> {
 
   const {user}=useContext(UserContext);
-
   if(user===false){
     return <p>Loading...</p>;
   }
