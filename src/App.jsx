@@ -10,7 +10,7 @@ const App=()=> {
 
   const {user}=useContext(UserContext);
   if(user===false){
-    return <p>Loading...</p>;
+    return <p>Esperando...FireBase</p>;
   }
 
   return (
