@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { formValidate } from "../utils/formValidate";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ import {NavLink} from 'react-router-dom'
 
 const Register = () => {
     const navegate = useNavigate();
-    const { registerUser , handleClickGoogle} = useContext(UserContext);
+    const { registerUser , registergoogle,user} = useContext(UserContext);
     const { required, patternEmail, minLength, validateTrim, validateEquals } =
         formValidate();
 
@@ -36,6 +36,19 @@ const Register = () => {
             setError(code, { message });
         }
     };
+    const handleClickGoogle=async() =>{
+        try{
+            await registergoogle();
+        } catch(error){
+            console.log(error.code)
+        }
+      }
+
+      useEffect(()=>{
+        if(user!=null){
+            navegate('/')
+        }
+    },[user])  
 
     return (
         <section className="flex flex-row md:flex-row h-screen items-center">
