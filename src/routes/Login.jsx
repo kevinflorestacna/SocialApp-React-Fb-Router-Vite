@@ -48,7 +48,7 @@ const Login = () => {
     },[user])  
 
     return (
-        <section className="flex flex-row md:flex-row h-screen items-center">
+        <section className="flex flex-row md:flex-row h-screen items-center bg-white">
             <div className="h-screen hidden bg-blue-600 lg:block md:w-1/2 xl:w-2/3">
                 <img src={bg} className="w-full h-full object-cover" alt=""/>
             </div>

@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore/lite"
+import { addDoc, collection, getDocs, orderBy, query, where,doc,setDoc, serverTimestamp, deleteDoc, updateDoc } from "firebase/firestore/lite"
 import {  useState } from "react"
 import { auth, db,storage } from "../firebase"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
@@ -8,27 +8,30 @@ export const useFirestore = () => {
 
     const [data,setData]=useState([])
     const [error,setError]=useState()
-    const [loading,setLoading]=useState(false)
-    const [loadingimg,setLoadingimg]=useState(false)
+    const [loading,setLoading]=useState({})
+    const fechaPublicacion = new Date();
 
     const getData= async()=>{
+        
         try {
-            setLoading(true)
+            setLoading(prev=>({...prev, getdata:true}))
             const dataRef=collection(db,"publicaciones")
-            const filtro=query(dataRef,where("uid","==",auth.currentUser.uid))
+            const filtro=query(dataRef,where("uid","==",auth.currentUser.uid,orderBy("timestamp")))
             const querySnapshot = await getDocs(filtro)
-            const dataFB=querySnapshot.docs.map(doc=>({id:doc.id,...doc.data()}))
+            const dataFB=querySnapshot.docs.map(doc=>(doc.data()))
+            
             setData(dataFB)
         } catch (error) {
             console.log(error)
             setError(error.message)
         } finally{
-            setLoading(false)
+            setLoading(prev=>({...prev, getdata:false}))
+            console.log(data)
         }
     }
     const sendData = async(publicacion,archivo)=>{
         try {
-            setLoading(true)
+            setLoading(prev=>({...prev, sendata:true}))
             const result= await uploadimg(archivo)
             console.log(result)
             try {
@@ -37,22 +40,24 @@ export const useFirestore = () => {
                 setError(error.message)
             }
             const newDoc={
+                nanoid:nanoid(6),
                 comment:publicacion,
+                date:serverTimestamp(),
                 photo:result,
-                like:0,
+                like:false,
                 uid:auth.currentUser.uid
             }
-            //const docRef=doc(db,"publicaciones","")
-            //await setDoc(docRef,newDoc)
-            const docRef= collection(db,"publicaciones")
-            await addDoc(docRef,newDoc)
+            const docRef=doc(db,"publicaciones",newDoc.nanoid)
+            await setDoc(docRef,newDoc)
+            //const docRef= collection(db,"publicaciones")
+            //await addDoc(docRef,newDoc)
             setData([...data,newDoc])
-            console.log(newDoc.id)
-            console.log(data)
+            //console.log(newDoc.id)
+            //console.log(data)
         } catch (error) {
             setError(error.message)
         }finally{
-            setLoading(false)
+            setLoading(prev=>({...prev, sendata:false}))
         }
     }
     const uploadimg= async(file)=>{
@@ -62,7 +67,24 @@ export const useFirestore = () => {
         const url=await getDownloadURL(storageRef)
         return url
     }
+    const deleteData =async(nanoid)=>{
+        try {
+            const docRef=doc(db,"publicaciones",nanoid)
+            await deleteDoc(docRef)
+            setData(data.filter((item)=>item.nanoid !==nanoid))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    const editData =async(nanoid,likes)=>{
+        try {
+            const docRef=doc(db,"publicaciones",nanoid)
+            await updateDoc(docRef,{like:!likes})
+        } catch (error) {
+            console.log(error)
+        }
+    }
   return {
-    data,error,loading,getData,sendData,uploadimg,
+    data,error,loading,getData,sendData,uploadimg,deleteData,editData,
   }  
 }

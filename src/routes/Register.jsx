@@ -51,7 +51,7 @@ const Register = () => {
     },[user])  
 
     return (
-        <section className="flex flex-row md:flex-row h-screen items-center">
+        <section className="flex flex-row md:flex-row h-screen items-center bg-white">
             <div className="h-screen hidden items-center justify-center bg-rose-600 lg:flex md:w-1/2 xl:w-1/2 ">
                 <div className="flex flex-col items-center justify-end">
                     <h3 className="text-white text-semibold text-2xl underline decoration-solid underline-offset-8">Bienvenido a Social - React - App - Firebase</h3>

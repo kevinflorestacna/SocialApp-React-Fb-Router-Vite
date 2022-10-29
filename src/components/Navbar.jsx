@@ -15,10 +15,10 @@ const Navbar =()=>{
     return(
         <div>
             {user?(
-                <>
-                    <NavLink to="/">Inicio </NavLink>
-                    <button onClick={handleClickLogout}>Cerrar Sesion</button>
-                </>
+                <div className='text-white bg-slate-900 p-5 mx-5 flex justify-between items-center font-bold text-xl'>
+                    <NavLink to="/">Social App</NavLink>
+                    <button onClick={handleClickLogout} className="hover:text-rose-700">Cerrar Sesion</button>
+                </div>
             ):(
                 <>
                     <NavLink to="/Login">Login </NavLink>
